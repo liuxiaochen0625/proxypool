@@ -25,7 +25,7 @@ public class Main {
         IpPoolHolder.init(DungProxyContext.create().setPoolEnabled(true));
         HttpClientBuilder httpClientBuilder = HttpClientBuilder.create();
         httpClientBuilder.setRetryHandler(new DunProxyHttpRequestRetryHandler(null))
-                .setRoutePlanner(new ProxyBindRoutPlanner());
+            .setRoutePlanner(new ProxyBindRoutPlanner());
         CloseableHttpClient closeableHttpClient = httpClientBuilder.build();
 
         HttpGet httpGet = new HttpGet("http://www.baidu.com");

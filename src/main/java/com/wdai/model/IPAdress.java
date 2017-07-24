@@ -116,12 +116,7 @@ public class IPAdress {
 
     @Override
     public String toString() {
-        return "IPAdress{" +
-                "host='" + host + '\'' +
-                ", port='" + port + '\'' +
-                ", serverAddress='" + serverAddress + '\'' +
-                ", type='" + type + '\'' +
-                ", speed='" + speed + '\'' +
-                '}';
+        return "IPAdress{" + "host='" + host + '\'' + ", port='" + port + '\'' + ", serverAddress='"
+               + serverAddress + '\'' + ", type='" + type + '\'' + ", speed='" + speed + '\'' + '}';
     }
 }

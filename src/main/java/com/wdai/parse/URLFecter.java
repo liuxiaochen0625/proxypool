@@ -21,8 +21,9 @@ import static java.lang.System.out;
  */
 public class URLFecter {
     //使用代理进行爬取
-    public static List<IPAdress> urlParse(String url, String ip, String port, List<IPAdress> ipMessages)
-            throws ClassNotFoundException, IOException {
+    public static List<IPAdress> urlParse(String url, String ip, String port,
+                                          List<IPAdress> ipMessages) throws ClassNotFoundException,
+                                                                     IOException {
         //调用一个类使其返回html源码
         String html = HttpUtils.getHtml(url, ip, port);
 
@@ -41,8 +42,8 @@ public class URLFecter {
     }
 
     //使用本机IP爬取xici代理网站的第一页
-    public static List<IPAdress> urlParse(String url, List<IPAdress> list)
-            throws IOException, ClassNotFoundException {
+    public static List<IPAdress> urlParse(String url, List<IPAdress> list) throws IOException,
+                                                                           ClassNotFoundException {
         String html = HttpUtils.getHtml(url);
 
         //将html解析成DOM结构
@@ -63,8 +64,7 @@ public class URLFecter {
             String ipPort = trs.get(i).select("td").get(2).text();
             String serverAddress = trs.get(i).select("td").get(3).text();
             String ipType = trs.get(i).select("td").get(5).text();
-            String ipSpeed = trs.get(i).select("td").get(6).select("div[class=bar]").
-                    attr("title");
+            String ipSpeed = trs.get(i).select("td").get(6).select("div[class=bar]").attr("title");
 
             ipMessage.setHost(ipAddress);
             ipMessage.setPort(ipPort);

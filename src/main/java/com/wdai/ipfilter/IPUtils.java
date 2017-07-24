@@ -34,22 +34,24 @@ public class IPUtils {
             port = ipMessages.get(i).getPort();
 
             HttpHost proxy = new HttpHost(ip, Integer.parseInt(port));
-            RequestConfig config = RequestConfig.custom().setProxy(proxy).setConnectTimeout(3000).
-                    setSocketTimeout(3000).build();
+            RequestConfig config = RequestConfig.custom().setProxy(proxy).setConnectTimeout(3000)
+                .setSocketTimeout(3000).build();
             HttpGet httpGet = new HttpGet("https://www.baidu.com");
             httpGet.setConfig(config);
 
-            httpGet.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;" +
-                    "q=0.9,image/webp,*/*;q=0.8");
+            httpGet.setHeader("Accept",
+                "text/html,application/xhtml+xml,application/xml;" + "q=0.9,image/webp,*/*;q=0.8");
             httpGet.setHeader("Accept-Encoding", "gzip, deflate, sdch");
             httpGet.setHeader("Accept-Language", "zh-CN,zh;q=0.8");
-            httpGet.setHeader("User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit" +
-                    "/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36");
+            httpGet.setHeader(
+                "User-Agent", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit"
+                              + "/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36");
 
             try {
                 response = httpClient.execute(httpGet);
             } catch (IOException e) {
-                out.println("不可用代理已删除" + ipMessages.get(i).getHost() + ": " + ipMessages.get(i).getPort());
+                out.println(
+                    "不可用代理已删除" + ipMessages.get(i).getHost() + ": " + ipMessages.get(i).getPort());
                 ipMessages.remove(ipMessages.get(i));
                 i--;
             }

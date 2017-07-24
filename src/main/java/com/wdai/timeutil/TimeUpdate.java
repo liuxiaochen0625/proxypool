@@ -25,16 +25,16 @@ public class TimeUpdate {
         //真正执行的任务并不是Job接口的实例，而是用反射的方式实例化的一个JobDetail实例
         JobDetail job = JobBuilder.newJob(MyTimeJob.class).withIdentity("job1", "group1").build();
         // 定义一个触发器，job 1将每隔执行一次
-        CronTrigger trigger = TriggerBuilder.newTrigger().withIdentity("trigger1", "group1").
-                withSchedule(CronScheduleBuilder.cronSchedule("30 04 18 * * ?")).build();
+        CronTrigger trigger = TriggerBuilder.newTrigger().withIdentity("trigger1", "group1")
+            .withSchedule(CronScheduleBuilder.cronSchedule("30 04 18 * * ?")).build();
 
         //执行任务和触发器
         Date ft = sched.scheduleJob(job, trigger);
 
         //格式化日期显示格式
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss SSS");
-        System.out.println(job.getKey() + " 已被安排执行于: " + sdf.format(ft) + "，" +
-                "并且以如下重复规则重复执行: " + trigger.getCronExpression());
+        System.out.println(job.getKey() + " 已被安排执行于: " + sdf.format(ft) + "，" + "并且以如下重复规则重复执行: "
+                           + trigger.getCronExpression());
 
         sched.start();
     }
