@@ -63,7 +63,7 @@ public class CityCode {
         }
         Class.forName("com.mysql.jdbc.Driver");
         Connection conn = DriverManager.getConnection("jdbc:mysql://192.168.21.225:3306/db_crawler",
-            "root", "Weidai@123");
+            "***", "***");
         String sql = "INSERT INTO tb_city_code(province_name,province_code,city_name,city_code,county_name,county_code) VALUES (?,?,?,?,?,?)";
         PreparedStatement statement = conn.prepareStatement(sql);
         for (Pair<String, String> pair : citys.keySet()) {
