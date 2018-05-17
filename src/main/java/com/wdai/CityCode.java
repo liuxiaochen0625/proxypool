@@ -27,71 +27,62 @@ public class CityCode {
     public static void main(String[] args) throws ClassNotFoundException, SQLException {
         ImproveDownloader downloader = new ImproveDownloader();
         Request request = new Request(
-            "http://www.stats.gov.cn/tjsj/tjbz/xzqhdm/201703/t20170310_1471429.html");
+            "http://www.stats.gov.cn/tjsj/tjbz/tjyqhdmhcxhfdm/2016/index.html");
         Page page = downloader.download(request);
-        List<Selectable> selectables = page.getHtml().xpath("//*[@class='MsoNormal']").nodes();
-        Map<Pair<String, String>, Map<Pair<String, String>, Map<String, String>>> citys = new HashMap<>();
-        for (Selectable selectable : selectables) {
-            List<Selectable> nodes = selectable.xpath("/p/b").nodes();
-            if (nodes != null && nodes.size() > 0) {
-                String code = selectable.xpath("/p/b[1]/span/text()").get();
-                String city = selectable.xpath("/p/b[2]/span/text()").get();
-                if (StringUtils.isBlank(city)) {
-                    code = selectable.xpath("/p/span/text()").get();
-                    city = selectable.xpath("/p/b[1]/span/text()").get();
-                }
-                citys.put(new Pair<>(code, city), new HashMap<>());
-            } else {
-                String secCode = selectable.xpath("/p/span[2]/text()").get().trim();
-                String secCity = selectable.xpath("/p/span[3]/text()").get().trim();
-                secCity = secCity.replaceAll("　", "");
-                String temp = secCode.substring(0, 2) + "0000";
-                String str = secCode.substring(0, 4) + "00";
-                for (Pair<String, String> pair : citys.keySet()) {
-                    if (temp.equals(pair.getLeft())) {
-                        if (secCode.endsWith("00"))
-                            citys.get(pair).put(new Pair<>(secCode, secCity),
-                                new HashMap<String, String>());
-                        else {
-                            for (Pair<String, String> p : citys.get(pair).keySet())
-                                if (str.equals(p.getLeft()))
-                                    citys.get(pair).get(p).put(secCode, secCity);
-                        }
-                    }
-                }
-            }
-        }
+        List<Selectable> provinceNodes = page.getHtml().xpath("//*[@class='provincetr']/td")
+            .nodes();
         Class.forName("com.mysql.jdbc.Driver");
-        Connection conn = DriverManager.getConnection("jdbc:mysql://192.168.21.225:3306/db_crawler",
+        Connection conn = DriverManager.getConnection("jdbc:mysql://127.0.0.1:3306/db_crawler",
             "***", "***");
-        String sql = "INSERT INTO tb_city_code(province_name,province_code,city_name,city_code,county_name,county_code) VALUES (?,?,?,?,?,?)";
+        String sql = "INSERT INTO tb_city_code_2(province_name,province_code,city_name,city_code,county_name,county_code) VALUES (?,?,?,?,?,?)";
         PreparedStatement statement = conn.prepareStatement(sql);
-        for (Pair<String, String> pair : citys.keySet()) {
-            statement.setString(1, pair.getRight());
-            statement.setInt(2, Integer.valueOf(pair.getLeft()));
-            if (citys.get(pair).size() == 0) {
-                statement.setString(3, null);
-                statement.setInt(4, 0);
-                statement.setString(5, null);
-                statement.setInt(6, 0);
-                statement.execute();
-            } else {
-                for (Pair<String, String> p : citys.get(pair).keySet()) {
-                    statement.setString(3, p.getRight());
-                    statement.setInt(4, Integer.valueOf(p.getLeft()));
-                    if (citys.get(pair).get(p).size() == 0) {
-                        statement.setString(5, null);
-                        statement.setInt(6, 0);
-                        statement.execute();
-                    } else {
-                        for (Map.Entry<String, String> entry : citys.get(pair).get(p).entrySet()) {
-                            statement.setString(5, entry.getValue());
-                            statement.setInt(6, Integer.valueOf(entry.getKey()));
-                            statement.execute();
-                        }
-                    }
+        for (Selectable provinceNode : provinceNodes) {
+            String proviceName = provinceNode.xpath("/td/a/text()").get();
+            String provinceUrl = provinceNode.links().get();
+            String provinceCode = getCode(provinceUrl);
+            request = new Request(provinceUrl);
+            page = downloader.download(request);
+            List<Selectable> cityNodes = page.getHtml().xpath("//*[@class='citytr']").nodes();
+            for (Selectable cityNode : cityNodes) {
+                String cityName = cityNode.xpath("/tr/td[2]/a/text()").get();
+                String cityUrl = cityNode.xpath("/tr/td[2]").links().get();
+                String cityCode = getCode(cityUrl);
+                request = new Request(cityUrl);
+                page = downloader.download(request);
+                List<Selectable> countyNodes = page.getHtml().xpath("//*[@class='countytr']")
+                    .nodes();
+                for (Selectable countyNode : countyNodes) {
+                    String countyName = countyNode.xpath("/tr/td[2]/a/text()").get();
+                    if (StringUtils.isBlank(countyName))
+                        countyName = countyNode.xpath("/tr/td[2]/text()").get();
+                    String countyUrl = countyNode.xpath("/tr/td[2]").links().get();
+                    String countyCode;
+                    if (StringUtils.isNotBlank(countyUrl))
+                        countyCode = getCode(countyUrl);
+                    else
+                        countyCode = countyNode.xpath("/tr/td[1]/text()").get().substring(0, 6);
+                    System.out.println(provinceCode + "-" + proviceName + "=" + cityCode + "-"
+                                       + cityName + "-" + countyCode + "-" + countyName);
+                    statement.setString(1, proviceName);
+                    statement.setInt(2, Integer.valueOf(provinceCode));
+                    statement.setString(3, cityName);
+                    statement.setInt(4, Integer.valueOf(cityCode));
+                    statement.setString(5, countyName);
+                    statement.setInt(6, Integer.valueOf(countyCode));
+                    statement.execute();
                 }
             }
         }
+    }
+
+    private static String getCode(String url) {
+        int pos = url.lastIndexOf("/") + 1;
+        String temp = url.substring(pos).replaceAll("\\.html", "");
+        if (temp.length() == 2)
+            return temp + "0000";
+        else if (temp.length() == 4)
+            return temp + "00";
+        else
+            return temp;
     }
 }
